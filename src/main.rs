@@ -1,4 +1,4 @@
-use poise::serenity_prelude as serenity;
+use poise::{PrefixFrameworkOptions, serenity_prelude as serenity};
 use std::env;
 
 struct Data {}
@@ -8,6 +8,20 @@ type Context<'a> = poise::Context<'a, Data, Error>;
 #[poise::command(slash_command, prefix_command)]
 pub async fn ping(ctx: Context<'_>) -> Result<(), Error> {
     let response = "Pong!";
+    ctx.say(response).await?;
+    Ok(())
+}
+
+#[poise::command(slash_command, prefix_command)]
+pub async fn secret(ctx: Context<'_>) -> Result<(), Error> {
+    let response = "Let X be an algebraic projective variety";
+    ctx.say(response).await?;
+    Ok(())
+}
+
+#[poise::command(slash_command, prefix_command)]
+pub async fn secret2(ctx: Context<'_>) -> Result<(), Error> {
+    let response = "omg i love modular forms";
     ctx.say(response).await?;
     Ok(())
 }
@@ -30,7 +44,11 @@ async fn main() {
 
     let framework = poise::Framework::builder()
         .options(poise::FrameworkOptions {
-            commands: vec![ping(), lmfdb()],
+            prefix_options: PrefixFrameworkOptions {
+                prefix: Some("rusty".into()),
+                ..Default::default()
+            },
+            commands: vec![ping(), lmfdb(), secret(), secret2()],
             ..Default::default()
         })
         .setup(|ctx, _ready, framework| {
