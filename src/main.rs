@@ -14,6 +14,8 @@ async fn ping(ctx: Context<'_>) -> Result<(), Error> {
 
 #[tokio::main]
 async fn main() {
+    dotenv::dotenv().ok();
+
     let token = env::var("TOKEN").expect("Expected a token in the environment");
     let intents = serenity::GatewayIntents::non_privileged();
 
