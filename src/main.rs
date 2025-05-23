@@ -7,33 +7,95 @@ struct Data {}
 type Error = Box<dyn std::error::Error + Send + Sync>;
 type Context<'a> = poise::Context<'a, Data, Error>;
 
+//Register
+#[poise::command(slash_command, prefix_command)]
+pub async fn register(ctx: Context<'_>) -> Result<(), Error> {
+    let commands = vec![ ping(),
+                lmfdb(),
+                secret(),
+                secret2(),register()];
+    poise::builtins::register_in_guild(ctx, &commands, ctx.guild_id().unwrap()).await?;
+    Ok(())
+}
+
+
+// Basic commands
 #[poise::command(slash_command, prefix_command)]
 pub async fn ping(ctx: Context<'_>) -> Result<(), Error> {
-    let response = "Pong!";
-    ctx.say(response).await?;
+    ctx.say("Pong!").await?;
     Ok(())
 }
 
 #[poise::command(slash_command, prefix_command)]
 pub async fn secret(ctx: Context<'_>) -> Result<(), Error> {
-    let response = "Let X be an algebraic projective variety";
-    ctx.say(response).await?;
+    ctx.say("Let X be an algebraic projective variety").await?;
     Ok(())
 }
 
 #[poise::command(slash_command, prefix_command)]
 pub async fn secret2(ctx: Context<'_>) -> Result<(), Error> {
-    let response = "omg i love modular forms";
+    ctx.say("omg i love modular forms").await?;
+    Ok(())
+}
+
+// LMFDB command group
+#[poise::command(slash_command, prefix_command, subcommands("modular_forms","number_fields"))]
+pub async fn lmfdb(ctx: Context<'_>) -> Result<(), Error> {
+    ctx.say("Welcome to LMFDB commands! Try `/lmfdb modular_forms` for modular forms functionality.").await?;
+    Ok(())
+}
+
+// Modular forms subcommand group
+#[poise::command(
+    slash_command,
+    prefix_command,
+    subcommands("mf_properties"),
+    subcommand_required
+)]
+pub async fn modular_forms(ctx: Context<'_>) -> Result<(), Error> {
+    ctx.say("Modular forms commands - please use a subcommand").await?;
+    Ok(())
+}
+
+//Number fields subcommand group
+#[poise::command(
+    slash_command,
+    prefix_command,
+    subcommands("nf_properties"),
+    subcommand_required
+)]
+pub async fn number_fields(ctx: Context<'_>) -> Result<(), Error> {
+    ctx.say("Number fields commands - please use a subcommand").await?;
+    Ok(())
+}
+
+
+// Properties subcommand
+#[poise::command(slash_command, prefix_command)]
+pub async fn mf_properties(
+    ctx: Context<'_>,
+    #[description = "Level"] level: Option<i32>,
+    #[description = "Weight"] weight: Option<i32>,
+    #[description = "Character"] character: Option<String>,
+) -> Result<(), Error> {
+    let response = format!(
+        "Modular form properties - Level: {:?}, Weight: {:?}, Character: {:?}",
+        level, weight, character
+    );
     ctx.say(response).await?;
     Ok(())
 }
 
 #[poise::command(slash_command, prefix_command)]
-pub async fn lmfdb(
+pub async fn nf_properties(
     ctx: Context<'_>,
-    #[description = "Description here"] text: String,
+    #[description = "Discriminant"] discriminant: Option<i32>,
 ) -> Result<(), Error> {
-    ctx.say(text).await?;
+    let response = format!(
+        "Number fields properties - discriminant: {:?}",
+        discriminant
+    );
+    ctx.say(response).await?;
     Ok(())
 }
 
@@ -55,7 +117,12 @@ async fn main() {
                 prefix: Some("rusty".into()),
                 ..Default::default()
             },
-            commands: vec![ping(), lmfdb(), secret(), secret2()],
+            commands: vec![
+                ping(),
+                lmfdb(),
+                secret(),
+                secret2(),register()
+            ],
             ..Default::default()
         })
         .setup(|ctx, _ready, framework| {
