@@ -35,13 +35,6 @@ pub async fn lmfdb(
     Ok(())
 }
 
-#[poise::command(slash_command, prefix_command)]
-pub async fn register(ctx: Context<'_>) -> Result<(), Error> {
-    let commands = vec![ping(), lmfdb(), secret(), secret2(), register()];
-    poise::builtins::register_in_guild(ctx, &commands, ctx.guild_id().unwrap()).await?;
-    Ok(())
-}
-
 #[tokio::main]
 async fn main() {
     dotenv::dotenv().ok();
@@ -56,7 +49,7 @@ async fn main() {
                 prefix: Some("rusty".into()),
                 ..Default::default()
             },
-            commands: vec![ping(), lmfdb(), secret(), secret2(), register()],
+            commands: vec![ping(), lmfdb(), secret(), secret2()],
             ..Default::default()
         })
         .setup(|ctx, _ready, framework| {
