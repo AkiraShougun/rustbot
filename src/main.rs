@@ -47,7 +47,8 @@ async fn main() {
     dotenv::dotenv().ok();
 
     let token = env::var("TOKEN").expect("Expected a token in the environment");
-    let intents = serenity::GatewayIntents::non_privileged();
+    let intents =
+        serenity::GatewayIntents::non_privileged() | serenity::GatewayIntents::MESSAGE_CONTENT;
 
     let framework = poise::Framework::builder()
         .options(poise::FrameworkOptions {
