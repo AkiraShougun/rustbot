@@ -6,9 +6,18 @@ type Error = Box<dyn std::error::Error + Send + Sync>;
 type Context<'a> = poise::Context<'a, Data, Error>;
 
 #[poise::command(slash_command, prefix_command)]
-async fn ping(ctx: Context<'_>) -> Result<(), Error> {
+pub async fn ping(ctx: Context<'_>) -> Result<(), Error> {
     let response = "Pong!";
     ctx.say(response).await?;
+    Ok(())
+}
+
+#[poise::command(slash_command, prefix_command)]
+pub async fn lmfdb(
+    ctx: Context<'_>,
+    #[description = "Description here"] text: String,
+) -> Result<(), Error> {
+    ctx.say(text).await?;
     Ok(())
 }
 
@@ -21,7 +30,7 @@ async fn main() {
 
     let framework = poise::Framework::builder()
         .options(poise::FrameworkOptions {
-            commands: vec![ping()],
+            commands: vec![ping(), lmfdb()],
             ..Default::default()
         })
         .setup(|ctx, _ready, framework| {
