@@ -1,5 +1,7 @@
+use poise::serenity_prelude::all::ChannelId;
+use poise::serenity_prelude::{CreateMessage, Http};
 use poise::{PrefixFrameworkOptions, serenity_prelude as serenity};
-use std::env;
+use std::{env, io};
 
 struct Data {}
 type Error = Box<dyn std::error::Error + Send + Sync>;
@@ -40,6 +42,10 @@ async fn main() {
     dotenv::dotenv().ok();
 
     let token = env::var("TOKEN").expect("Expected a token in the environment");
+    let token_clone = token.clone();
+    let _terminal_handle = tokio::spawn(async move {
+        terminal_tools(&token_clone).await;
+    });
     let intents =
         serenity::GatewayIntents::non_privileged() | serenity::GatewayIntents::MESSAGE_CONTENT;
 
@@ -64,4 +70,54 @@ async fn main() {
         .framework(framework)
         .await;
     client.unwrap().start().await.unwrap();
+}
+
+async fn terminal_tools(token: &String) {
+    const TERMINAL_MESSAGE: &str = r"Select an option:
+        1) Send a mesasge
+        2) DM a user
+        3) View History
+        4) Ban";
+    let http = Http::new(token);
+    let mut key = String::new();
+    loop {
+        println!("{TERMINAL_MESSAGE}");
+
+        io::stdin()
+            .read_line(&mut key)
+            .expect("failed to read line");
+
+        match key.trim().chars().collect::<Vec<char>>()[0].to_ascii_uppercase() {
+            '1' => {
+                println!("What server would you like to send the message in (Channel ID): ");
+                let mut id_buf = String::new();
+                let mut message_buf = String::new();
+
+                io::stdin()
+                    .read_line(&mut id_buf)
+                    .expect("failed to read line");
+
+                println!("What would you like to say: ");
+
+                io::stdin()
+                    .read_line(&mut message_buf)
+                    .expect("failed to read line");
+
+                let channel_id = ChannelId::new(
+                    id_buf
+                        .trim()
+                        .parse::<u64>()
+                        .expect("That was not a valid channel ID chat"),
+                );
+                let message = CreateMessage::new().content(message_buf).tts(false);
+                let _ = channel_id.send_message(&http, message).await;
+            }
+            '2' => {}
+            '3' => {}
+            '4' => {}
+            _ => {
+                println!("That isn't a 1, 2, 3, or 4 pookie")
+            }
+        }
+    }
 }
